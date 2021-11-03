@@ -32,7 +32,7 @@
 #define MODBUS_SERIAL_BAUDRATE 19200 //real baud rate*2
 
 ////swap bytes (measurements) 
-#define PH_BYTE_LENGHT      0x0100  //PH sensor (AgCi version) version
+#define PH_BYTE_LENGHT      0x0300  //PH sensor (AgCi version) version
 #define PH_EL_BYTE_LENGHT   0x0100  //PH sensor electrode version
 #define LEAF_BYTE_LENGHT    0x0200  //LEAF SENSO
 #define SOIL_BYTE_LENGHT    0x0300  //ELECTROCONDUCTIVY HUMIDITY AND TEMPERATURE
@@ -51,8 +51,8 @@
 #define TOTALR_BYTE_LENGHT  0x0100  //TOTAL RADIARTION SENSOR
 
 //Star address
-#define PH_START_ADDRESS    0x0100
-#define PH_EL_START_ADDRESS 0x0100
+#define PH_START_ADDRESS    0x0000
+#define PH_EL_START_ADDRESS 0x0000
 #define LEAF_START_ADDRESS  0x0200
 #define SOIL_START_ADDRESS  0x0000
 #define THP_START_ADDRESS   0x0000
@@ -106,6 +106,8 @@ namespace modbus_structs
     typedef struct
     {
         uint16_t ph;
+        uint16_t ph_simpl;
+        uint16_t ph_temp;
     } rawPH;
 
     typedef struct
@@ -204,6 +206,8 @@ namespace modbus_structs
     typedef struct
     {
         float ph;
+        float ph_simpl;
+        float ph_temp;
     } pHSensorMeasure;
 
     typedef struct

@@ -34,7 +34,9 @@ modbus_structs::pHSensorMeasure MODBUS::buffer_to_ph(uint8_t *buffer)
 {
     modbus_structs::rawPH raw = *((modbus_structs::rawPH *)buffer);
     swap_bytes(&raw.ph);
-    return {(float)raw.ph / 100.0F};
+    swap_bytes(&raw.ph_simpl);
+    swap_bytes(&raw.ph_temp);
+    return {(float)(raw.ph / 100.0F),(float)(raw.ph_simpl / 10.0F),(float)(raw.ph_temp / 10.0F)};
 }
 
 modbus_structs::pHElSensorMeasure MODBUS::buffer_to_ph_el(uint8_t *buffer)
@@ -50,7 +52,7 @@ modbus_structs::LeafSensorMeasure MODBUS::buffer_to_leaf(uint8_t *buffer)
     MODBUS::swap_bytes(&raw.leaf_humidity);
     MODBUS::swap_bytes(&raw.leaf_temperature);
     // Leaf humidity is divided by 10 because it contains one decimal
-    return {(float)raw.leaf_humidity / 10.0F, (float)(raw.leaf_temperature / 100.0F) - 20.0F };
+    return {(float)(raw.leaf_humidity / 10.0F), (float)(raw.leaf_temperature / 100.0F) - 20.0F };
 }
 
 modbus_structs::SoilSensorMeasure MODBUS::buffer_to_soil(uint8_t *buffer)
@@ -222,9 +224,11 @@ void MODBUS::RegisterPHMeasure(modbus_structs::pHSensorMeasure ph, uint8_t index
     {
     case 1:
         DeviceMeasures.addMeasure(ph.ph, F("pH1"));
+        DeviceMeasures.addMeasure(ph.ph_temp, F("pH1_temp"));
         break;
     case 2:
         DeviceMeasures.addMeasure(ph.ph, F("pH2"));
+        DeviceMeasures.addMeasure(ph.ph_temp, F("pH2_temp"));
         break;
     }
 }
@@ -589,7 +593,7 @@ bool MODBUS::ModBus_MakeCMD(uint8_t address, uint8_t function_code)
         phSensorCounter++;
         cmd.registerStartAddress = PH_START_ADDRESS;
         cmd.registerLength = PH_BYTE_LENGHT;
-        dataBytes = 2;
+        dataBytes = 6;
         break;
     case modbus_enum::MODBUS_SENSOR_PH_EL:
         phelSensorCounter++;
