@@ -1,6 +1,7 @@
 #include "modbus/modbus.h"
 #include "json/json.h"
 #include "macro.h"
+#include "main/main.h"
 
 uint8_t phSensorCounter=0;
 uint8_t phelSensorCounter=0;
@@ -20,7 +21,80 @@ uint8_t uvSensorCounter=0;
 uint8_t parSensorCounter=0;
 uint8_t totalrSensorCounter=0;
 
-uint8_t sensorAddresses[] = {0x10,0x33,0x50,0xC0};
+// uint8_t MODBUS::detect_type(uint8_t addressSensor){
+//     uint8_t type_sensor;
+//     if (addressSensor == 0x01){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_WS;
+//     } 
+//     if ((addressSensor >= 0x02) && (addressSensor <= 0x04)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_WS2;
+//     } 
+//     else if ((addressSensor >= 0x05) && (addressSensor <= 0x06)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_WD;
+//     }
+//     else if ((addressSensor >= 0x07) && (addressSensor <= 0x08)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_WD2;
+//     }
+//     else if ((addressSensor >= 0x09) && (addressSensor <= 0x0B)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_W;
+//     }
+//     else if ((addressSensor >= 0x0C) && (addressSensor <= 0x0F)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_W2;
+//     }
+//     else if ((addressSensor >= 0x10) && (addressSensor <= 0x1F)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_SOIL;
+//     }
+//     else if ((addressSensor >= 0x20) && (addressSensor <= 0x2F)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_THP;
+//     }
+//     else if ((addressSensor >= 0x30) && (addressSensor <= 0x3F)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_PH;
+//     }
+//     else if ((addressSensor >= 0x40) && (addressSensor <= 0x9F)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_PH_EL;
+//     }
+//     else if ((addressSensor >= 0x50) && (addressSensor <= 0x5F)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_NPK;
+//     }
+//     else if ((addressSensor >= 0x60) && (addressSensor <= 0x6F)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_WP;
+//     }
+//     else if ((addressSensor >= 0x70) && (addressSensor <= 0x7F)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_UV;
+//     }
+//     else if ((addressSensor >= 0x80) && (addressSensor <= 0x8F)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_PAR;
+//     }
+//     else if ((addressSensor >= 0x90) && (addressSensor <= 0x95)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_TOTALR;
+//     }
+//     else if ((addressSensor >= 0x96) && (addressSensor <= 0x9F)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_RT;
+//     }
+//     else if ((addressSensor >= 0xA0) && (addressSensor <= 0xAF)){
+//         type_sensor = modbus_enum::MODBUS_SENSOR_LEAF;
+//     }
+//     return type_sensor;
+// }
+
+//0x01 address available for wind speed sensor (4800 bauds) (version 1, cant change baud rate and address)
+//0x02 to 0x04 address available for wind speed sensor (version 2)
+//0x05 to 0x06 addresses available for wind direction (version 1)
+//0x07 to 0x08 addresses available for wind direction (version 2)
+//0x09 to 0x0B addresses available for rain sensor 
+//0x0C to 0x0F addresses available for rain volume sensor (pluviometer)
+//0x10 to 0x1F addresses available for soil sensor (EC,Humidity,temperature)
+//0x20 to 0x2F addresses available for temperature, humidity, pressure sensor (WSY-301) 
+//0x30 to 0x3F addresses available for PH sensor (AgCi version)
+//0x40 to 0x4F addresses available for PH sensor (Electrode Version)
+//0x50 to 0x5F addresses available for NPK sensor
+//0x60 to 0x6F addresses available for Water potential sensor (Pressure sensor on tensiometer)
+//0x70 to 0x7F addresses available for UV radiation sensor
+//0x80 to 0x8F addresses available for PAR radiation sensor
+//0x90 to 0x9F addresses available for Total solar radiation
+//0xA0 to 0xAF addresses available for Leaf sensor (Temperature, leaf humidity)
+
+uint8_t sensorAddresses[] = {0x33,0x50,0xC0};
 
 void MODBUS::swap_bytes(uint16_t *byte)
 {
@@ -807,6 +881,8 @@ bool MODBUS::ModBus_MakeCMD(uint8_t address, uint8_t function_code)
 
 void MODBUS::makeMeasures()
 {
+    MODBUS_SERIAL.begin(MODBUS_SERIAL_BAUDRATE);
+    digitalWrite(pinRs485, HIGH);
     for (uint8_t i = 0; i < (sizeof(sensorAddresses)/sizeof(uint8_t)); i++) {
         bool state = MODBUS::ModBus_MakeCMD(sensorAddresses[i], modbus_enum::MODBUS_CMD_READ);
         if(state){
@@ -818,6 +894,8 @@ void MODBUS::makeMeasures()
             //Serial.println(sensorAddresses[i],HEX);
         }
     }
+    digitalWrite(pinRs485, LOW);
+    MODBUS_SERIAL.end();
 
     phSensorCounter=0;
     phelSensorCounter=0;

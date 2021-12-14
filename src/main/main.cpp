@@ -86,24 +86,24 @@ void CheckPower(){
 }
 
 void checktime(){
+  printTime();
   uint8_t AlarmsFired = Clock.checkAlarms();
   if(AlarmsFired & 2)
   {
     MyDateAndTime = Clock.read();
     if(MyDateAndTime.Minute % PostTime  == 00){
+      printTime();
+      CheckPower();
       Sprintln(F("Time to make measures"));
+      //Si el tiempo se perdio, guardarlo de nuevo, se obtiene del gps
       if(MyDateAndTime.Year<20){
+        Sprintln(F("Tiempo perdido, volviendo a setear el tiempo"));
         setTime();
       }
-      printTime();
-
       init_Json();
       time_to_String();
-      CheckPower();
       GPRS_MODULE.updateGps();
-      digitalWrite(pinRs485, HIGH);
       Sensors.makeMeasures();
-      digitalWrite(pinRs485, LOW);
       Sprintln(F("Posting data.."));
       bool postState = postData();
       if(postState){
@@ -119,29 +119,24 @@ void checktime(){
 
 void setAlarm(){
   Clock.begin();
-  printTime();
-  
   Clock.disableAlarms();
   Clock.setAlarm(DS3231_Simple::ALARM_EVERY_MINUTE); 
 }
 
 
 void setTime(){
-
   Sprintln(F("Setting time..  "));
   uint8_t year =0, month = 0, day = 0, hour = 0, minute = 0, second = 0; 
 
   bool state = GPRS_MODULE.getTime(&year, &month, &day, &hour, &minute, &second);
   if (state){  
     DateTime MyTimestamp;
-
     MyTimestamp.Day    = day;
     MyTimestamp.Month  = month;
     MyTimestamp.Year   = year; 
     MyTimestamp.Hour   = hour;
     MyTimestamp.Minute = minute;
     MyTimestamp.Second = second;
-
     Clock.write(MyTimestamp);
     Sprintln(F("Date updated correctly"));
 
@@ -168,18 +163,16 @@ void printTime(){
 void setup() {
 
   Serial.begin(SERIAL_BAUDRATE);
-  MODBUS_SERIAL.begin(MODBUS_SERIAL_BAUDRATE);
 
-  setAlarm();
-
-  pinMode(SIM808_RST_PIN, OUTPUT);
+  pinMode(SIM808_RST_PIN, OUTPUT); //RST pin for SIM808
   digitalWrite(SIM808_RST_PIN, LOW);
-  pinMode(pinPostLed, OUTPUT);
+  pinMode(pinPostLed, OUTPUT); //SET PIN FOR BLINK LED
   digitalWrite(pinPostLed, LOW);
-  pinMode(pinRs485, OUTPUT);
+  pinMode(pinRs485, OUTPUT); //SET PIN FOR ACTIVE SENSORS
   digitalWrite(pinRs485, LOW);
 
-  //Begin ina219
+  setAlarm();
+  //Begin ina219 for measure voltage and current
   ina219.begin();
   //ina219.setCalibration_16V_400mA();
   ina219.setCalibration_32V_1A();
@@ -187,7 +180,6 @@ void setup() {
   CheckPower();
 
   bool SIM_INIT=0;
-
   while(!SIM_INIT){
     Sprintln("Trying start SIM808..");
     SIM_INIT = GPRS_MODULE.setup_SIM808();

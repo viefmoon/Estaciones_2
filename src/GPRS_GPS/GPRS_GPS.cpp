@@ -48,8 +48,8 @@ void SIM_808::GSM_CheckStatus()
 
 bool SIM_808::setup_SIM808()
 {
-    SIM808.setGPRSNetworkSettings(F("internet.emt.ee "), F(""), F(""));
-    //SIM808.setGPRSNetworkSettings(F("internet.itelcel.com"), F("webgprs"), F("webgprs2002"));
+    //SIM808.setGPRSNetworkSettings(F("internet.emt.ee "), F(""), F(""));
+    SIM808.setGPRSNetworkSettings(F("internet.itelcel.com"), F("webgprs"), F("webgprs2002"));
 
     SIM808_SERIAL.begin(SIM808_SERIAL_BAUDRATE);
 
@@ -163,7 +163,6 @@ void SIM_808::addLocationDevice(LocationData_t location)
 void SIM_808::updateGps()
 {   
     Sprintln(F("Updating GPS"));
-    // Serial.println(F("Update GPS.."));
     SIM808.enableGPS(true);
     float lat = 0, lon = 0, spd = 0, head = 0, alt = 0;
     uint8_t year =0, month = 0, day = 0, hour = 0, minute = 0, second = 0; 
@@ -183,13 +182,11 @@ void SIM_808::updateGps()
         _location.longitude = -103.39556;
         _location.latitude = 20.572337;
         _location.altitude = 1517;
-
         SIM_808::addLocationDevice(_location);
     }
     else
     {
         Sprintln(F("GPS updated correctly"));
-
         // Serial.print("GPS lat:");
         // Serial.println(lat, 6);
         // Serial.print("GPS long:");
@@ -199,7 +196,6 @@ void SIM_808::updateGps()
         _location.longitude = lon;
         _location.latitude = lat;
         _location.altitude = alt;
-
         SIM_808::addLocationDevice(_location);
     }
 }

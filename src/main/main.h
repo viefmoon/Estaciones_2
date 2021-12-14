@@ -4,8 +4,8 @@
 #define SERIAL_BAUDRATE 19200 // real serial * 2
 #define RTC_CODE_MEASURE "s"
 
-#define PostTime    15
-#define pinPostLed   24
+#define PostTime    5
+#define pinPostLed  24
 #define pinRs485    6
 
 extern void checktime();
