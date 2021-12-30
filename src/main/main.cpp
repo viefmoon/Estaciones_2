@@ -71,18 +71,25 @@ bool postData(){
 }
 
 void CheckPower(){
-
   float shuntvoltage = ina219.getShuntVoltage_mV();
   float busvoltage = ina219.getBusVoltage_V();
   //float power_mW = ina219.getPower_mW();
   float current_mA = ina219.getCurrent_mA();
   float loadvoltage = busvoltage + (shuntvoltage / 1000);
-  
   Sprint(F("Voltage: ")); Sprint((loadvoltage)); Sprintln(F(" V"));
   Sprint(F("Current: ")); Sprint((current_mA)); Sprintln(F(" mA"));
+  DeviceMeasures.addMeasure( loadvoltage, F("vol"));
+  DeviceMeasures.addMeasure( current_mA, F("cur"));
+}
 
-  DeviceMeasures.addMeasure( loadvoltage, F("sec2"));
-  DeviceMeasures.addMeasure( current_mA, F("sh2"));
+void CheckPow(){
+  float shuntvoltage = ina219.getShuntVoltage_mV();
+  float busvoltage = ina219.getBusVoltage_V();
+  //float power_mW = ina219.getPower_mW();
+  float current_mA = ina219.getCurrent_mA();
+  float loadvoltage = busvoltage + (shuntvoltage / 1000);
+  Sprint(F("Voltage: ")); Sprint((loadvoltage)); Sprintln(F(" V"));
+  Sprint(F("Current: ")); Sprint((current_mA)); Sprintln(F(" mA"));
 }
 
 void checktime(){
@@ -93,7 +100,6 @@ void checktime(){
     MyDateAndTime = Clock.read();
     if(MyDateAndTime.Minute % PostTime  == 00){
       printTime();
-      CheckPower();
       Sprintln(F("Time to make measures"));
       //Si el tiempo se perdio, guardarlo de nuevo, se obtiene del gps
       if(MyDateAndTime.Year<20){
@@ -102,6 +108,7 @@ void checktime(){
       }
       init_Json();
       time_to_String();
+      CheckPower();
       GPRS_MODULE.updateGps();
       Sensors.makeMeasures();
       Sprintln(F("Posting data.."));
@@ -177,8 +184,6 @@ void setup() {
   //ina219.setCalibration_16V_400mA();
   ina219.setCalibration_32V_1A();
 
-  CheckPower();
-
   bool SIM_INIT=0;
   while(!SIM_INIT){
     Sprintln("Trying start SIM808..");
@@ -195,5 +200,5 @@ void setup() {
 
 void loop() {
   checktime(); 
-  //CheckPower();
+  //CheckPow();
 }

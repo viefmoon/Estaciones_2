@@ -15,7 +15,7 @@
 //0x30 to 0x3F addresses available for PH sensor (AgCi version)
 //0x40 to 0x4F addresses available for PH sensor (Electrode Version)
 //0x50 to 0x5F addresses available for NPK sensor
-//0x60 to 0x6F addresses available for Water potential sensor (Pressure sensor on tensiometer)
+ 
 //0x70 to 0x7F addresses available for UV radiation sensor
 //0x80 to 0x8F addresses available for PAR radiation sensor
 //0x90 to 0x9F addresses available for Total solar radiation
@@ -26,7 +26,7 @@
 #define RX_LENGHT_WITHOUT_DATA 5
 #define MODBUS_TX_BUFFER_LENGHT 8
 
-#define MaxAttempts 5
+#define MaxAttempts 6
 
 #define MODBUS_SERIAL Serial2
 #define MODBUS_SERIAL_BAUDRATE 19200 //real baud rate*2
@@ -53,7 +53,7 @@
 //Star address
 #define PH_START_ADDRESS    0x0000
 #define PH_EL_START_ADDRESS 0x0000
-#define LEAF_START_ADDRESS  0x0200
+#define LEAF_START_ADDRESS  0x0000
 #define SOIL_START_ADDRESS  0x0000
 #define THP_START_ADDRESS   0x0000
 #define NPK_START_ADDRESS   0x1E00
@@ -144,7 +144,7 @@ namespace modbus_structs
 
     typedef struct
     {
-        uint16_t water_potential;
+        int16_t water_potential;
     } rawWp;
 
 

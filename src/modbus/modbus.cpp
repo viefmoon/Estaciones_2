@@ -94,7 +94,8 @@ uint8_t totalrSensorCounter=0;
 //0x90 to 0x9F addresses available for Total solar radiation
 //0xA0 to 0xAF addresses available for Leaf sensor (Temperature, leaf humidity)
 
-uint8_t sensorAddresses[] = {0x33,0x50,0xC0};
+uint8_t sensorAddresses[] = {0x60,0x61,0xA0,0xA1,0x10,0x11,0x30,0x31,0x20,0x50};
+//uint8_t sensorAddresses[] = {0x50};
 
 void MODBUS::swap_bytes(uint16_t *byte)
 {
@@ -168,7 +169,7 @@ modbus_structs::WpSensorMeasure MODBUS::buffer_to_wp(uint8_t *buffer)
 
     MODBUS::swap_bytes(&raw.water_potential);
 
-    return {(float)raw.water_potential};
+    return {(float)raw.water_potential / 100.0F};
 }
 
 
@@ -298,11 +299,11 @@ void MODBUS::RegisterPHMeasure(modbus_structs::pHSensorMeasure ph, uint8_t index
     {
     case 1:
         DeviceMeasures.addMeasure(ph.ph, F("pH1"));
-        DeviceMeasures.addMeasure(ph.ph_temp, F("pH1_temp"));
+        //DeviceMeasures.addMeasure(ph.ph_temp, F("pH1_temp"));
         break;
     case 2:
         DeviceMeasures.addMeasure(ph.ph, F("pH2"));
-        DeviceMeasures.addMeasure(ph.ph_temp, F("pH2_temp"));
+        //DeviceMeasures.addMeasure(ph.ph_temp, F("pH2_temp"));
         break;
     }
 }
@@ -572,7 +573,7 @@ uint8_t MODBUS::detect_type(uint8_t addressSensor){
     else if ((addressSensor >= 0x30) && (addressSensor <= 0x3F)){
         type_sensor = modbus_enum::MODBUS_SENSOR_PH;
     }
-    else if ((addressSensor >= 0x40) && (addressSensor <= 0x9F)){
+    else if ((addressSensor >= 0x40) && (addressSensor <= 0x4F)){
         type_sensor = modbus_enum::MODBUS_SENSOR_PH_EL;
     }
     else if ((addressSensor >= 0x50) && (addressSensor <= 0x5F)){
@@ -616,101 +617,119 @@ bool MODBUS::ModBus_MakeCMD(uint8_t address, uint8_t function_code)
     switch (sensor_type)
     {
     case modbus_enum::MODBUS_SENSOR_WS:
+        Sprintln(F("ID FROM WS"));
         wsSensorCounter++;
         cmd.registerStartAddress = WS_START_ADDRESS;
         cmd.registerLength = WS_BYTE_LENGHT;
         dataBytes = 2;
         break;
     case modbus_enum::MODBUS_SENSOR_WS2:
+    Sprintln(F("ID FROM WS2"));
         ws2SensorCounter++;
         cmd.registerStartAddress = WS2_START_ADDRESS;
         cmd.registerLength = WS2_BYTE_LENGHT;
         dataBytes = 2;
         break;
     case modbus_enum::MODBUS_SENSOR_WD:
+    Sprintln(F("ID FROM WD"));
         wdSensorCounter++;
         cmd.registerStartAddress = WD_START_ADDRESS;
         cmd.registerLength = WD_BYTE_LENGHT;
         dataBytes = 2;
         break;
     case modbus_enum::MODBUS_SENSOR_WD2:
+        Sprintln(F("ID FROM WD2"));
         wd2SensorCounter++;
         cmd.registerStartAddress = WD2_START_ADDRESS;
         cmd.registerLength = WD2_BYTE_LENGHT;
         dataBytes = 2;
         break;
     case modbus_enum::MODBUS_SENSOR_W:
+    Sprintln(F("ID FROM W"));
         wSensorCounter++;
         cmd.registerStartAddress = W_START_ADDRESS;
         cmd.registerLength = W_BYTE_LENGHT;
         dataBytes = 2;
         break;
     case modbus_enum::MODBUS_SENSOR_W2:
+        Sprintln(F("ID FROM W2"));
         w2SensorCounter++;
         cmd.registerStartAddress = W2_START_ADDRESS;
         cmd.registerLength = W2_BYTE_LENGHT;
         dataBytes = 2;
         break;
     case modbus_enum::MODBUS_SENSOR_SOIL:
+        Sprintln(F("ID FROM SOIL"));
         soilSensorCounter++;
         cmd.registerStartAddress = SOIL_START_ADDRESS;
         cmd.registerLength = SOIL_BYTE_LENGHT;
         dataBytes = 6;
         break;
     case modbus_enum::MODBUS_SENSOR_THP:
+        Sprintln(F("ID FROM THP"));
         thpSensorCounter++;
         cmd.registerStartAddress = THP_START_ADDRESS;
         cmd.registerLength = THP_BYTE_LENGHT;
         dataBytes = 6;
         break;
     case modbus_enum::MODBUS_SENSOR_PH:
+        Sprintln(F("ID FROM PH"));
         phSensorCounter++;
         cmd.registerStartAddress = PH_START_ADDRESS;
         cmd.registerLength = PH_BYTE_LENGHT;
         dataBytes = 6;
         break;
     case modbus_enum::MODBUS_SENSOR_PH_EL:
+        Sprintln(F("ID FROM PH_EL"));
         phelSensorCounter++;
         cmd.registerStartAddress = PH_EL_START_ADDRESS;
         cmd.registerLength = PH_EL_BYTE_LENGHT;
         dataBytes = 2;
         break;
     case modbus_enum::MODBUS_SENSOR_NPK:
+        Sprintln(F("ID FROM NPK SENSOR"));
         npkSensorCounter++;
         cmd.registerStartAddress = NPK_START_ADDRESS;
         cmd.registerLength = NPK_BYTE_LENGHT;
         dataBytes = 6;
+        break;
     case modbus_enum::MODBUS_SENSOR_WP:
+        Sprintln(F("ID FROM WP"));
         wpSensorCounter++;
         cmd.registerStartAddress = WP_START_ADDRESS;
         cmd.registerLength = WP_BYTE_LENGHT;
         dataBytes = 2;
         break;
     case modbus_enum::MODBUS_SENSOR_UV:
+        Sprintln(F("ID FROM UV"));
         uvSensorCounter++;
         cmd.registerStartAddress = UV_START_ADDRESS;
         cmd.registerLength = UV_BYTE_LENGHT;
         dataBytes = 2;
         break;
     case modbus_enum::MODBUS_SENSOR_PAR:
+        Sprintln(F("ID FROM PAR"));
         parSensorCounter++;
         cmd.registerStartAddress = PAR_START_ADDRESS;
         cmd.registerLength = PAR_BYTE_LENGHT;
         dataBytes = 2;
         break;
     case modbus_enum::MODBUS_SENSOR_TOTALR:
+        Sprintln(F("ID FROM TOTALR"));
         totalrSensorCounter++;
         cmd.registerStartAddress = TOTALR_START_ADDRESS;
         cmd.registerLength = TOTALR_BYTE_LENGHT;
         dataBytes = 2;
         break;
     case modbus_enum::MODBUS_SENSOR_LEAF:
+        Sprintln(F("ID FROM LEAF"));
         leafSensorCounter++;
         cmd.registerStartAddress = LEAF_START_ADDRESS;
         cmd.registerLength = LEAF_BYTE_LENGHT;
         dataBytes = 4;
         break;
     case modbus_enum::MODBUS_SENSOR_RT:
+        Sprintln(F("ID FROM RT"));
         rtSensorCounter++;
         cmd.registerStartAddress = RT_START_ADDRESS;
         cmd.registerLength = RT_BYTE_LENGHT;
@@ -727,7 +746,7 @@ bool MODBUS::ModBus_MakeCMD(uint8_t address, uint8_t function_code)
             uint8_t buffer[RX_LENGHT_WITHOUT_DATA + dataBytes]; 
             attempts++;
             MODBUS_SERIAL.write((uint8_t*)&cmd, sizeof(cmd));
-            MODBUS_SERIAL.setTimeout(1000);
+            MODBUS_SERIAL.setTimeout(2000);
             if ((MODBUS_SERIAL.readBytes(buffer, RX_LENGHT_WITHOUT_DATA + dataBytes))==(RX_LENGHT_WITHOUT_DATA + dataBytes)){
 
                 uint8_t *buffer_data = &buffer[3]; // the data come after 3 bytes |adress| |cmd| |byte length| |DATA|
@@ -781,12 +800,6 @@ bool MODBUS::ModBus_MakeCMD(uint8_t address, uint8_t function_code)
                     case modbus_enum::MODBUS_SENSOR_SOIL:
                         {
                         modbus_structs::SoilSensorMeasure soilMeasures = MODBUS::buffer_to_soil(buffer_data);
-                        // Serial.print("Soil EC: ");
-                        // Serial.println(soilMeasures.ec);
-                        // Serial.print("Soil humidity: ");
-                        // Serial.println(soilMeasures.humidity);
-                        // Serial.print("Soil Temperature: ");
-                        // Serial.println(soilMeasures.temperature);
                         RegisterSoilMeasure(soilMeasures, soilSensorCounter);
                         return true;
                         }
@@ -895,7 +908,6 @@ void MODBUS::makeMeasures()
         }
     }
     digitalWrite(pinRs485, LOW);
-    MODBUS_SERIAL.end();
 
     phSensorCounter=0;
     phelSensorCounter=0;
